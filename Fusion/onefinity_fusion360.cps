@@ -1,28 +1,28 @@
 /**
-  Copyright (C) 2012-2020 by Autodesk, Inc.
+  Copyright (C) 2012-2021 by Autodesk, Inc.
   All rights reserved.
 
   Onefinity post processor configuration.
 
-  $Revision: 43008 31731a89b929cfd1a62f827c2b8ebf233f944dc9 $
-  $Date: 2020-11-17 14:36:18 $
+  $Revision: 43242 a5a0aa6a6357c6456920970306b90da5de1f0892 $
+  $Date: 2021-04-30 15:24:00 $
   
   FORKID {1467B300-821C-4276-88D6-2DAED8EC5C9E}
 */
 
-description = "Onefinity";
+description = "Onefinity Community v43242.4";
 vendor = "Kirbre Enterprises Inc.";
 vendorUrl = "https://www.onefinitycnc.com/";
 
 // >>>>> INCLUDED FROM ../common/buildbotics mill.cps
 
 if (!description) {
-  description = "Buildbotics controller";
+  description = "Onefinity controller";
 }
 
-legal = "Copyright (C) 2012-2020 by Autodesk, Inc.";
+legal = "Copyright (C) 2012-2021 by Autodesk, Inc.";
 certificationLevel = 2;
-minimumRevision = 40783;
+minimumRevision = 45702;
 
 if (!longDescription) {
   longDescription = subst("Generic post for %1", description);
@@ -40,61 +40,132 @@ maximumCircularRadius = spatial(1000, MM);
 minimumCircularSweep = toRad(0.01);
 maximumCircularSweep = toRad(180);
 allowHelicalMoves = true;
-//allowedCircularPlanes = undefined; // allow any circular motion
-allowedCircularPlanes = 0;
+allowedCircularPlanes = 0; // disable all circular interpolation (enable automatically if useCircularInterpolation is true)
 
 // user-defined properties
 properties = {
-  writeMachine: true, // write machine
-  writeTools: true, // writes the tools
-  preloadTool: false, // preloads next tool on tool change if any
-  showSequenceNumbers: true, // show sequence numbers
-  sequenceNumberStart: 10, // first sequence number
-  sequenceNumberIncrement: 5, // increment for sequence numbers
-  optionalStop: false, // optional stop - Set to false for Buildbotics because no action is taken on M1 commands. We can change this back to true when the optional pause button is added to the user interface
-  separateWordsWithSpace: true, // specifies that the words should be separated with a white space
-  safePositionMethod: "G53", // specifies the desired safe position option
-  rotaryTableAxis: "none", // none, X, Y, Z, -X, -Y, -Z
-  useCoolant: false // machine supports coolant
-};
-
-// user-defined property definitions
-propertyDefinitions = {
-  writeMachine: {title:"Write machine", description:"Output the machine settings in the header of the code.", group:0, type:"boolean"},
-  writeTools: {title:"Write tool list", description:"Output a tool list in the header of the code.", group:0, type:"boolean"},
-  preloadTool: {title:"Preload tool", description:"Preloads the next tool at a tool change (if any).", type:"boolean"},
-  showSequenceNumbers: {title:"Use sequence numbers", description:"Use sequence numbers for each block of outputted code.", group:1, type:"boolean"},
-  sequenceNumberStart: {title:"Start sequence number", description:"The number at which to start the sequence numbers.", group:1, type:"integer"},
-  sequenceNumberIncrement: {title:"Sequence number increment", description:"The amount by which the sequence number is incremented by in each block.", group:1, type:"integer"},
-  optionalStop: {title:"Optional stop", description:"Outputs optional stop code during when necessary in the code.", type:"boolean"},
-  separateWordsWithSpace: {title:"Separate words with space", description:"Adds spaces between words if 'yes' is selected.", type:"boolean"},
-  useM06: {title:"Output M6", description:"Disable to disallow the output of M6 on tool changes.", type:"boolean"},
+  writeMachine: {
+    title: "Write machine",
+    description: "Output the machine settings in the header of the code.",
+    group: 0,
+    type: "boolean",
+    value: true,
+    scope: "post"
+  },
+  writeTools: {
+    title: "Write tool list",
+    description: "Output a tool list in the header of the code.",
+    group: 0,
+    type: "boolean",
+    value: true,
+    scope: "post"
+  },
+  preloadTool: {
+    title: "Preload tool",
+    description: "Preloads the next tool at a tool change (if any).",
+    type: "boolean",
+    value: false,
+    scope: "post"
+  },
+  showSequenceNumbers: {
+    title: "Use sequence numbers",
+    description: "Use sequence numbers for each block of outputted code.",
+    group: 1,
+    type: "boolean",
+    value: true,
+    scope: "post"
+  },
+  sequenceNumberStart: {
+    title: "Start sequence number",
+    description: "The number at which to start the sequence numbers.",
+    group: 1,
+    type: "integer",
+    value: 10,
+    scope: "post"
+  },
+  sequenceNumberIncrement: {
+    title: "Sequence number increment",
+    description: "The amount by which the sequence number is incremented by in each block.",
+    group: 1,
+    type: "integer",
+    value: 5,
+    scope: "post"
+  },
+  optionalStop: {
+    title: "Optional stop",
+    description: "Outputs optional stop code during when necessary in the code.",
+    type: "boolean",
+    value: false,
+    scope: "post"
+  },
+  separateWordsWithSpace: {
+    title: "Separate words with space",
+    description: "Adds spaces between words if 'yes' is selected.",
+    type: "boolean",
+    value: true,
+    scope: "post"
+  },
+  useM06: {
+    title: "Output M6",
+    description: "Disable to disallow the output of M6 on tool changes.",
+    type: "boolean"
+  },
   safePositionMethod: {
     title: "Safe Retracts",
     description: "Select your desired retract option. 'Clearance Height' retracts to the operation clearance height.",
     type: "enum",
-    values:[
-      {title:"G28", id: "G28"},
-      {title:"G53", id: "G53"},
-      {title:"Clearance Height", id: "clearanceHeight"}
-    ]
+    values: [
+      {title: "G28", id: "G28"},
+      {title: "G53", id: "G53"},
+      {title: "Clearance Height", id: "clearanceHeight"}
+    ],
+    value: "G53",
+    scope: "post"
   },
   rotaryTableAxis: {
     title: "Rotary table axis",
     description: "Select rotary table axis. Check the table direction on the machine and use the (Reversed) selection if the table is moving in the opposite direction.",
     type: "enum",
-    values:[
-      {title:"No rotary", id:"none"},
-      {title:"X", id:"x"},
-      {title:"Y", id:"y"},
-      {title:"Z", id:"z"},
-      {title:"X (Reversed)", id:"-x"},
-      {title:"Y (Reversed)", id:"-y"},
-      {title:"Z (Reversed)", id:"-z"}
-    ]
+    values: [
+      {title: "No rotary", id: "none"},
+      {title: "X", id: "x"},
+      {title: "Y", id: "y"},
+      {title: "Z", id: "z"},
+      {title: "X (Reversed)", id: "-x"},
+      {title: "Y (Reversed)", id: "-y"},
+      {title: "Z (Reversed)", id: "-z"}
+    ],
+    value: "none",
+    scope: "post"
   },
-  useCoolant: {title:"Use coolant", description:"Specifies that coolant should be output", type:"boolean"}
-
+  useCoolant: {
+    title: "Use coolant",
+    description: "Specifies that coolant should be output",
+    type: "boolean",
+    value: false,
+    scope: "post"
+  },
+  useCircularInterpolation: {
+    title: "Circular interpolation",
+    description: "Output arcs as linear moves when set to No.",
+    type: "boolean",
+    value: true,
+    scope: "post"
+  },
+  spindleDelay: {
+    title: "Spindle Delay",
+    description: "Time in seconds to delay after setting spindle speed.",
+    type: "integer",
+    value: 0,
+    scope: "post"
+  },
+  spindlePause: {
+    title: "Spindle Pause",
+    description: "Insert a pause (M0 message) to let user control waiting for a spindle.",
+    type: "boolean",
+    value: false,
+    scope: "post"
+  }
 };
 
 var permittedCommentChars = " ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789.,=_-";
@@ -121,6 +192,7 @@ var gFormat = createFormat({prefix:"G", decimals:1});
 var mFormat = createFormat({prefix:"M", decimals:1});
 var hFormat = createFormat({prefix:"H", decimals:1});
 var dFormat = createFormat({prefix:"D", decimals:1});
+var pFormat = createFormat({prefix:"P", decimals:0});
 
 var xyzFormat = createFormat({decimals:(unit == MM ? 3 : 4)});
 var abcFormat = createFormat({decimals:3, forceDecimal:true, scale:DEG});
@@ -139,6 +211,8 @@ var cOutput = createVariable({prefix:"C"}, abcFormat);
 var feedOutput = createVariable({prefix:"F"}, feedFormat);
 var sOutput = createVariable({prefix:"S", force:true}, rpmFormat);
 var dOutput = createVariable({}, dFormat);
+var gOutput = createVariable({}, gFormat);
+var pOutput = createVariable({}, pFormat);
 
 // circular output
 var iOutput = createReferenceVariable({prefix:"I", force:true}, xyzFormat);
@@ -168,9 +242,9 @@ function writeBlock() {
   if (!text) {
     return;
   }
-  if (properties.showSequenceNumbers) {
+  if (getProperty("showSequenceNumbers")) {
     writeWords2("N" + sequenceNumber, arguments);
-    sequenceNumber += properties.sequenceNumberIncrement;
+    sequenceNumber += getProperty("sequenceNumberIncrement");
   } else {
     writeWords(arguments);
   }
@@ -189,8 +263,12 @@ function writeComment(text) {
 
 function onOpen() {
 
+  if (getProperty("useCircularInterpolation")) {
+    allowedCircularPlanes = undefined; // Allow circular interpolation in all three planes
+  }
+
   // Define rotary attributes from properties
-  var rotary = parseChoice(properties.rotaryTableAxis, "-Z", "-Y", "-X", "NONE", "X", "Y", "Z");
+  var rotary = parseChoice(getProperty("rotaryTableAxis"), "-Z", "-Y", "-X", "NONE", "X", "Y", "Z");
   if (rotary < 0) {
     error(localize("Valid rotaryTableAxis values are: None, X, Y, Z, -X, -Y, -Z"));
     return;
@@ -203,10 +281,10 @@ function onOpen() {
     var rotaryVector = [0, 0, 0];
     rotaryVector[masterAxis] = rotary / Math.abs(rotary);
     var aAxis;
-    if (properties.useTableDirectionCodes) {
-      aAxis = createAxis({coordinate:masterAxis, table:true, axis:rotaryVector, cyclic:true, range:[0, 360], preference:0});
+    if (getProperty("useTableDirectionCodes")) {
+      aAxis = createAxis({coordinate:0, table:true, axis:rotaryVector, cyclic:true, range:[0, 360], preference:0});
     } else {
-      aAxis = createAxis({coordinate:masterAxis, table:true, axis:rotaryVector, cyclic:true, preference:0});
+      aAxis = createAxis({coordinate:0, table:true, axis:rotaryVector, cyclic:true, preference:0});
     }
     machineConfiguration = new MachineConfiguration(aAxis);
   
@@ -225,11 +303,11 @@ function onOpen() {
     cOutput.disable();
   }
   
-  if (!properties.separateWordsWithSpace) {
+  if (!getProperty("separateWordsWithSpace")) {
     setWordSeparator("");
   }
 
-  sequenceNumber = properties.sequenceNumberStart;
+  sequenceNumber = getProperty("sequenceNumberStart");
   writeln("%");
 
   if (programName) {
@@ -244,7 +322,7 @@ function onOpen() {
   var model = machineConfiguration.getModel();
   var description = machineConfiguration.getDescription();
 
-  if (properties.writeMachine && (vendor || model || description)) {
+  if (getProperty("writeMachine") && (vendor || model || description)) {
     writeComment(localize("Machine"));
     if (vendor) {
       writeComment("  " + localize("vendor") + ": " + vendor);
@@ -258,7 +336,7 @@ function onOpen() {
   }
 
   // dump tool information
-  if (properties.writeTools) {
+  if (getProperty("writeTools")) {
     var zRanges = {};
     if (is3D()) {
       var numberOfSections = getNumberOfSections();
@@ -491,7 +569,7 @@ function onSection() {
     
     setCoolant(COOLANT_OFF);
   
-    if (!isFirstSection() && properties.optionalStop) {
+    if (!isFirstSection() && getProperty("optionalStop")) {
       onCommand(COMMAND_STOP); // optional stop not yet supported
     }
 
@@ -500,7 +578,7 @@ function onSection() {
     }
 
     if (!isFirstSection()) {
-      writeBlock("T" + toolFormat.format(tool.number), conditional(properties.useM06, mFormat.format(6)));
+      writeBlock("T" + toolFormat.format(tool.number), conditional(getProperty("useM06"), mFormat.format(6)));
     } else {
       writeComment("T" + toolFormat.format(tool.number));
     }
@@ -526,7 +604,7 @@ function onSection() {
       }
     }
 
-    if (properties.preloadTool && properties.useM06) {
+    if (getProperty("preloadTool") && getProperty("useM06")) {
       var nextTool = getNextTool(tool.number);
       if (nextTool) {
         writeBlock("T" + toolFormat.format(nextTool.number));
@@ -554,9 +632,19 @@ function onSection() {
     if (spindleSpeed > 99999) {
       warning(localize("Spindle speed exceeds maximum value."));
     }
+    if (getProperty("spindleDelay") < 0) {
+      error(localize("Spindle delay may not be < 0"));
+      return;
+    }
     writeBlock(
       sOutput.format(spindleSpeed), mFormat.format(tool.clockwise ? 3 : 4)
     );
+    if (getProperty("spindleDelay") > 0) {
+      writeBlock(sOutput.format(4), pFormat.format(getProperty("spindleDelay")));
+    }
+    if (getProperty("spindlePause")) {
+      writeBlock("M0 (MSG, Wait for Spindle)");
+    }
   }
 
   // wcs
@@ -666,6 +754,13 @@ function onDwell(seconds) {
 
 function onSpindleSpeed(spindleSpeed) {
   writeBlock(sOutput.format(spindleSpeed));
+  if (getProperty("spindleDelay") > 0) {
+    writeBlock(sOutput.format(4), pFormat.format(getProperty("spindleDelay")));
+  }
+  if (getProperty("spindlePause")) {
+    //put in pause after spindle speed change
+    writeBlock("M0 (MSG, Wait for Spindle)");
+  }
 }
 
 function onCycle() {
@@ -964,7 +1059,7 @@ function onLinear5D(_x, _y, _z, _a, _b, _c, feed) {
 }
 
 // Start of multi-axis feedrate logic
-/***** You can add 'properties.useInverseTime' if desired. *****/
+/***** You can add 'getProperty("useInverseTime'") if desired. *****/
 /***** 'previousABC' can be added throughout to maintain previous rotary positions. Required for Mill/Turn machines. *****/
 /***** 'headOffset' should be defined when a head rotary axis is defined. *****/
 /***** The feedrate mode must be included in motion block output (linear, circular, etc.) for Inverse Time feedrate support. *****/
@@ -1283,7 +1378,7 @@ function setCoolant(coolant) {
 }
 
 function getCoolantCodes(coolant) {
-  if (properties.useCoolant) {
+  if (getProperty("useCoolant")) {
     return undefined;
   }
   var multipleCoolantBlocks = new Array(); // create a formatted array to be passed into the outputted line
@@ -1402,7 +1497,7 @@ function onSectionEnd() {
 function writeRetract() {
   var words = []; // store all retracted axes in an array
   var retractAxes = new Array(false, false, false);
-  var method = properties.safePositionMethod;
+  var method = getProperty("safePositionMethod");
   if (method == "clearanceHeight") {
     if (!is3D()) {
       error(localize("Retract option 'Clearance Height' is not supported for multi-axis machining."));
@@ -1492,6 +1587,10 @@ function onClose() {
   writeln("%");
 }
 
+function setProperty(property, value) {
+  properties[property].current = value;
+}
 // <<<<< INCLUDED FROM ../common/buildbotics mill.cps
 
-properties.useM06 = false; // output M06 with tool changes
+properties.useM06.value = false; // output M06 with tool changes
+
